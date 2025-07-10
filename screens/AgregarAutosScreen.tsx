@@ -35,6 +35,14 @@ export default function AgregarAutosScreen() {
 
     }, [])
 
+    function guardar(uid: String){
+        set(ref(db, 'vendedores/' + uid + "/autos/"+ placa), {
+    marca:marca,
+    color:color,
+    modelo:modelo,
+  });
+    }
+
     function leer(uid: String) {
         const starCountRef = ref(db, 'vendedores/' + uid);
         onValue(starCountRef, (snapshot) => {
@@ -68,10 +76,11 @@ export default function AgregarAutosScreen() {
                 style={styles.input}
             />
 
-            <Button title='Añadir' onPress={() => editar(uid)} />
+            <Button title='Guardar' onPress={() => guardar(uid)} />
         </View>
     )
 }
+
 const styles = StyleSheet.create({
     input: {
         fontSize: 25,

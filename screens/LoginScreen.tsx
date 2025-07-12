@@ -15,7 +15,7 @@ export default function LoginScreen({ navigation }: any) {
         // Signed in 
         const user = userCredential.user;
         console.log(user)
-        navigation.navigate('AgregarAutos')
+        navigation.navigate('TopTabs')
       })
       .catch((error) => {
         let errorCode = error.code;

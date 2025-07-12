@@ -1,16 +1,15 @@
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { onValue, push, ref, set, update } from 'firebase/database'
+import { onValue, ref, update } from 'firebase/database'
 import { auth, db } from '../firebase/Config'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 
-export default function AgregarAutosScreen({ navigation }: any) {
+export default function EditarAutosScreen({ navigation }: any) {
     const [uid, setuid] = useState("")
     const [placa, setplaca] = useState("")
     const [marca, setmarca] = useState("")
     const [color, setcolor] = useState("")
     const [modelo, setmodelo] = useState("")
-
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -18,38 +17,45 @@ export default function AgregarAutosScreen({ navigation }: any) {
                 const uid = user.uid;
                 setuid(uid);
                 leer(uid)
-
             } else {
-                // User is signed out
-                // ...
+                // Usuario no está autenticado
             }
         });
-
     }, [])
 
-    function guardar(uid: String) {
-        set(ref(db, 'vendedores/' + uid + "/autos/" + placa), {
+    function editar(uid: string) {
+        if (!placa) {
+            Alert.alert("Error", "Debe ingresar la placa para editar el auto")
+            return;
+        }
+        const autoRef = ref(db, 'vendedores/' + uid + "/autos/" + placa);
+
+        update(autoRef, {
             marca: marca,
             color: color,
             modelo: modelo,
+        })
+        .then(() => {
+            Alert.alert("Éxito", "Auto editado correctamente")
+        })
+        .catch((error) => {
+            Alert.alert("Error", "No se pudo editar el auto: " + error.message)
         });
-
-
     }
 
-    function leer(uid: String) {
+    function leer(uid: string) {
         const starCountRef = ref(db, 'vendedores/' + uid);
         onValue(starCountRef, (snapshot) => {
             const data = snapshot.val();
+            // Puedes usar los datos si quieres mostrar algo
         });
     }
 
     function logout() {
         signOut(auth).then(() => {
-            // Sign-out successful.
             navigation.navigate('Home')
         }).catch((error) => {
-            // An error happened.
+            Alert.alert("Error", error.message)
         });
     }
 
@@ -59,27 +65,31 @@ export default function AgregarAutosScreen({ navigation }: any) {
                 placeholder='Ingresar placa'
                 onChangeText={(texto) => setplaca(texto)}
                 style={styles.input}
+                value={placa}
             />
 
             <TextInput
                 placeholder='Ingresar marca'
                 onChangeText={(texto) => setmarca(texto)}
                 style={styles.input}
+                value={marca}
             />
 
             <TextInput
                 placeholder='Ingresar color'
                 onChangeText={(texto) => setcolor(texto)}
                 style={styles.input}
+                value={color}
             />
 
             <TextInput
                 placeholder='Ingresar modelo'
                 onChangeText={(texto) => setmodelo(texto)}
                 style={styles.input}
+                value={modelo}
             />
 
-            <Button title='Guardar' onPress={() => guardar(uid)} />
+            <Button title='Editar' onPress={() => editar(uid)} />
             <Button title='Logout' onPress={() => logout()} />
         </View>
     )
